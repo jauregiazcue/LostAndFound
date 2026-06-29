@@ -5,7 +5,7 @@ import Footer from "@/components/Footer/Footer";
 import { TitleType } from "./components/Title/Title";
 
 function App() {
-  const debug = true;
+  const debug = false;
   const pathString = debug ? "LostAndFound/" : "";
  
   const footerData: LinkPayload[] = [];
