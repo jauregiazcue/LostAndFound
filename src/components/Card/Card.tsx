@@ -1,5 +1,5 @@
 import type { Payload } from "@interfaces/payload";
-import Link, { type LinksPayload } from "@components/Links/Link";
+import { type LinksPayload } from "@components/Links/Link";
 
 import "./Card.scss";
 
@@ -25,7 +25,7 @@ export interface CardPayload extends Payload {
 
 
 function Card(payload: CardPayload) {
-  const { id, title, subtitle, year, image, description, links } = payload;
+  const { id, title, year, image } = payload;
   let { type } = payload;
   const sectionStyle = image ? {
     backgroundImage: `url(${image})`,
@@ -43,13 +43,7 @@ function Card(payload: CardPayload) {
         <h3>{title}</h3>
         <h3>{year}</h3>
       </div>
-      {subtitle && <h4>{subtitle}</h4>}
-      {description && <p>{description}</p>}
     </div>
-    {links && links.list.length > 0 && <div className="card--footer">
-      <Link list={links.list}
-        type={links.type} />
-    </div>}
   </div>;
 }
 

@@ -22,7 +22,7 @@ function App() {
 
   return (
     <>
-      <CardGenerator title="Objetos Perdidos" id="objetosPerdidos" csv={`${pathString}ListadoResultados.xlsx`} type={CardGenType.grid}  titleType={TitleType.preHero}/>
+      <CardGenerator title="Objetos Perdidos" id="objetosPerdidos" csv={`${pathString}ListadoResultados.xlsx`} type={CardGenType.grid}  titleType={TitleType.common}/>
       <Footer id="contact"
         links={{ list: footerData, type: LinkType.simple }}
         owner={"Kai Jauregi Azcue"}

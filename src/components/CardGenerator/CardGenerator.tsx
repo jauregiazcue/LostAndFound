@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import readXlsxFile from 'read-excel-file/browser';
 
-
 import Card from '@components/Card/Card';
-import List from '@components/List/List';
 import Stack from '@components/Stack/Stack';
 import Title, { TitleType } from '@components/Title/Title';
 import type { Payload } from '@/interfaces/payload';
@@ -32,26 +30,45 @@ interface CardGeneratorPayload extends Payload {
 
 function CardGenerator(payload: CardGeneratorPayload) {
   const { id, type, title, titleType } = payload;
-  const [objects, setObjects] = useState<MyCardPayload[]>([]);
+  const [objectList, setObjectList] = useState<MyCardPayload[][]>([]);
+
+
+
+
 
   useEffect(() => {
+    async function getCardFullData() {
+      const response = await fetch(payload.csv);
+      const blob = await response.blob();
+      const rows = await (readXlsxFile)(blob);
+      const card: MyCardPayload[] = [];
+      rows.forEach((row) => {
+        row.data.forEach((data, index) => {
+          if (index == 0) return;
+          card.push({ title: data[5], year: data[3], image: "/LostAndFound/placeholder.png" } as MyCardPayload);
+        })
+
+      });
+      return card;
+    }
+
+    async function getCardSeparatedByAmount(card : MyCardPayload[])  {
+          let aux: MyCardPayload[] = [];
+          const aux2: MyCardPayload[][] = new Array<MyCardPayload[]>();
+          card.map((object: MyCardPayload, index: number) => {
+            aux.push(object);
+            if (index % 11 == 0 && index != 0) {
+              aux2.push(new Array<MyCardPayload>());
+              aux2[aux2.length - 1] = aux;
+              aux = [];
+            }
+          });
+          setObjectList(aux2);
+        }
+
     async function fetchExcel() {
       try {
-        // Fetch the file from the public folder and convert to a File/Blob
-        const response = await fetch(payload.csv);
-        const blob = await response.blob();
-        const rows = await (readXlsxFile)(blob);
-        const card: MyCardPayload[] = [];
-        rows.forEach((row) => {
-          row.data.forEach((data, index) => {
-            if (index == 0) return;
-            card.push({ title: data[5], year: data[3], image: "/LostAndFound/placeholder.png" } as MyCardPayload);
-          })
-
-        });
-
-        // Cast is needed because readXlsxFile returns Row[] without your schema type
-        setObjects(card);
+        getCardFullData().then(getCardSeparatedByAmount);
 
       } catch (err) {
         console.error('Failed to load Excel file:', err);
@@ -73,11 +90,12 @@ function CardGenerator(payload: CardGeneratorPayload) {
     return { title, description, year, image, list };
   }
 
-  if (type === CardGenType.grid) {
+
+  if (objectList.length > 0 && type === CardGenType.grid) {
     return <>
       <Title id={id} title={title} type={titleType} />
       <Stack fullPage={false}>
-        {objects.map((object: MyCardPayload, index: number) => {
+        {objectList[0].map((object: MyCardPayload, index: number) => {
           const { title, description, year, image, list } = setObject(object);
           return <Card key={index} title={title}
             year={year}
@@ -88,15 +106,6 @@ function CardGenerator(payload: CardGeneratorPayload) {
       </Stack>
     </>
   }
-
-  const aux: CardPayload[] = objects.map((object: MyCardPayload) => setObject(object));
-
-  return <>
-    <Title id={id} title={title} type={titleType} />
-    <Stack>
-      <List list={aux} />
-    </Stack>
-  </>
 }
 
 export default CardGenerator;
